@@ -18,7 +18,19 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -29,6 +41,10 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file demo/pom.xml
+      env:
+        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/test
+        SPRING_DATASOURCE_USERNAME: root
+        SPRING_DATASOURCE_PASSWORD: root
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
