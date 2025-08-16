@@ -32,6 +32,18 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
+#
+#      - name: Run Semgrep security scan
+#        uses: returntocorp/semgrep-action@v1
+#        with:
+#          config: p/security  # 使用官方安全规则集
+#          format: sarif
+#          output: semgrep-results.sarif
+#          severity: critical,high  # 仅关注严重级别问题
+#        env:
+#          SEMGREP_BASELINE_COMMIT: ${{ github.event.before || github.event.head.before }}
+#          SEMGREP_EXIT_CODE: 1  # 发现问题时返回非0退出码
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -44,3 +56,27 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/test
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
+  semgrep:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    name: Scan
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout project source
+      - uses: actions/checkout@v4
+
+      # Scan code using project's configuration on https://semgrep.dev/manage
+      - uses: returntocorp/semgrep-action@fcd5ab7459e8d91cb1777481980d1b18b4fc6735
+        with:
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+          #publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID }}
+          generateSarif: "1"
+
+      # Upload SARIF file generated in previous step
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        if: always()
