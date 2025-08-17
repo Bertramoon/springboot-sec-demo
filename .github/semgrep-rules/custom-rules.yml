@@ -1,0 +1,9 @@
+rules:
+  - id: java-sql-injection-createstatement
+    pattern: $conn.createStatement();
+    message: "使用 connection.createStatement() 可能导致 SQL 注入漏洞，建议使用 PreparedStatement: connection.prepareStatement(sql)，并注意sql参数本身不能有外部输入拼接"
+    severity: ERROR
+    languages: [java]
+    metadata:
+      cwe: "CWE-89: SQL Injection"
+      owasp: "A1: Injection"
