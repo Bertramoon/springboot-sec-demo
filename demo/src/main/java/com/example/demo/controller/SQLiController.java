@@ -1,8 +1,10 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
+import com.example.demo.service.SQLiService;
 import com.example.demo.vo.Response;
 import com.example.demo.vo.sqli.SQLiRequest;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,9 @@ public class SQLiController {
 
     @Value("${spring.datasource.password}")
     private String dbPassword;
+
+    @Resource
+    private SQLiService sqliService;
 
     @PostMapping("/jdbc-bad-1")
     public Response<List<User>> jdbcBad1(@RequestBody SQLiRequest request) {
@@ -91,6 +96,14 @@ public class SQLiController {
             e.printStackTrace();
             return Response.fail(e.getMessage());
         }
+    }
+
+    /**
+     * 使用service层调用
+     */
+    @PostMapping("/jdbc-bad-3")
+    public Response<List<User>> jdbcBad3(@RequestBody SQLiRequest request) {
+        return Response.success(sqliService.jdbcBad3(request));
     }
 
     @PostMapping("/jdbc-good-1")
