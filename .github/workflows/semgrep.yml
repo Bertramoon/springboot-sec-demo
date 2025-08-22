@@ -12,8 +12,6 @@ on:
       - main
       - master
       - dev
-    paths:
-      - .github/workflows/semgrep.yml
 
 permissions:
   # This permission is required when uploading sarifs to any repository at GitHub
