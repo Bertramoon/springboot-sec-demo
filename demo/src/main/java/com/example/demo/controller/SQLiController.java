@@ -106,6 +106,49 @@ public class SQLiController {
         return Response.success(sqliService.jdbcBad3(request));
     }
 
+    /**
+     * 使用私有函数调用
+     */
+    @PostMapping("/jdbc-bad-4")
+    public Response<List<User>> jdbcBad4(@RequestBody SQLiRequest request) {
+        return Response.success(jdbcBadSql(request));
+    }
+
+    private List<User> jdbcBadSql(SQLiRequest sqLiRequest) {
+        Map<String, Object> conditions = sqLiRequest.getConditions();
+        List<Object> args = new ArrayList<>();
+        List<User> result = new ArrayList<>();
+        // 获取JDBC连接并执行SQL查询
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword)) {
+            // 执行SQL查询
+            String sql = "SELECT * FROM user WHERE 1=1";
+            if (conditions != null && !conditions.isEmpty()) {
+                for (Map.Entry<String, Object> condition : conditions.entrySet()) {
+                    sql += " AND " + condition.getKey() + " = ?";
+                    args.add(condition.getValue());
+                }
+            }
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (int i = 0; i < args.size(); i++) {
+                    statement.setObject(i + 1, args.get(i));
+                }
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    // 处理查询结果
+                    while (resultSet.next()) {
+                        // 从结果集中获取数据
+                        int id = resultSet.getInt("id");
+                        String username = resultSet.getString("username");
+                        result.add(new User(id, username, null));
+                    }
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
     @PostMapping("/jdbc-good-1")
     public Response<List<User>> jdbcGood1(@RequestBody SQLiRequest request) {
         Map<String, Object> conditions = request.getConditions();
