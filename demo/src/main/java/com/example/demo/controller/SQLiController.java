@@ -161,9 +161,7 @@ public class SQLiController {
             if (conditions != null && !conditions.isEmpty()) {
                 for (Map.Entry<String, Object> condition : conditions.entrySet()) {
                     // 检查字段名是否在User类的属性中
-                    if (Arrays.stream(User.class.getDeclaredFields()).noneMatch(field -> field.getName().equals(condition.getKey()))) {
-                        return Response.fail("字段名不存在");
-                    }
+                    checkFieldName(condition.getKey());
                     sql += " AND " + condition.getKey() + " = ?";
                     args.add(condition.getValue());
                 }
@@ -186,6 +184,12 @@ public class SQLiController {
         } catch (SQLException e) {
             e.printStackTrace();
             return Response.fail(e.getMessage());
+        }
+    }
+
+    private void checkFieldName(String fieldName) {
+        if (Arrays.stream(User.class.getDeclaredFields()).noneMatch(field -> field.getName().equals(fieldName))) {
+            throw new IllegalArgumentException("字段名不存在");
         }
     }
 }
