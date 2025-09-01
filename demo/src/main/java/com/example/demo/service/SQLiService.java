@@ -6,5 +6,5 @@ import com.example.demo.vo.sqli.SQLiRequest;
 import java.util.List;
 
 public interface SQLiService {
-    public List<User> jdbcBad3(SQLiRequest sqLiRequest);
+    List<User> jdbcBad3(SQLiRequest sqLiRequest);
 }

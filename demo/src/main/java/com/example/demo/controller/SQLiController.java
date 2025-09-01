@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.User;
+import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.SQLiService;
 import com.example.demo.vo.Response;
 import com.example.demo.vo.sqli.SQLiRequest;
@@ -31,6 +32,9 @@ public class SQLiController {
 
     @Resource
     private SQLiService sqliService;
+
+    @Resource
+    private UserMapper userMapper;
 
     @PostMapping("/jdbc-bad-1")
     public Response<List<User>> jdbcBad1(@RequestBody SQLiRequest request) {
@@ -191,5 +195,42 @@ public class SQLiController {
         if (Arrays.stream(User.class.getDeclaredFields()).noneMatch(field -> field.getName().equals(fieldName))) {
             throw new IllegalArgumentException("字段名不存在");
         }
+    }
+
+    @PostMapping("/mybatis-bad-1")
+    public Response<List<User>> mybatisBad1(@RequestBody SQLiRequest request) {
+        Map<String, Object> conditions = request.getConditions();
+        List<User> result = userMapper.getUser(conditions);
+        return Response.success(result);
+    }
+
+    @PostMapping("/mybatis-bad-2")
+    public Response<List<User>> mybatisBad2(@RequestBody SQLiRequest request) {
+        Map<String, Object> conditions = request.getConditions();
+        List<User> result = userMapper.getSortedUser(conditions.get("orderBy").toString());
+        return Response.success(result);
+    }
+
+    @PostMapping("/mybatis-good-1")
+    public Response<List<User>> mybatisGood1(@RequestBody SQLiRequest request) {
+        Map<String, Object> conditions = request.getConditions();
+        // 检查字段名是否在User类的属性中
+        for (String fieldName : conditions.keySet()) {
+            checkFieldName(fieldName);
+        }
+        List<User> result = userMapper.getUser(conditions);
+        return Response.success(result);
+    }
+
+    @PostMapping("/mybatis-good-2")
+    public Response<User> mybatisGood2(@RequestBody int id) {
+        User user = userMapper.getUserById(id);
+        return Response.success(user);
+    }
+
+    @PostMapping("/mybatis-good-3")
+    public Response<User> mybatisGood3(@RequestBody String username) {
+        User user = userMapper.getUserByUsername(username);
+        return Response.success(user);
     }
 }
