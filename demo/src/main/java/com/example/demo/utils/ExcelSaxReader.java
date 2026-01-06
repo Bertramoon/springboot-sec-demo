@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 public class ExcelSaxReader {
     /**
-     * SAX方式读取Excel数据（内存安全）
+     * SAX方式读取Excel数据
      * @param path 文件路径
      */
     public static void read(String path) throws Exception {
@@ -21,7 +21,7 @@ public class ExcelSaxReader {
             saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             saxParserFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+            SAXParser saxParser = saxParserFactory.newSAXParser();
             XSSFReader.SheetIterator sheets = (XSSFReader.SheetIterator) reader.getSheetsData();
             while (sheets.hasNext()) {
                 try (InputStream sheetStream = sheets.next()) {
