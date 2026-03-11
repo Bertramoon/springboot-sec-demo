@@ -45,8 +45,15 @@ jobs:
           # and add it to your GitHub secrets.
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
+      - name: Upload SARIF results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-scan-results
+          path: semgrep-report.sarif
+        if: always()
+      
       - name: Upload SARIF file for GitHub Advanced Security Dashboard
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: semgrep.sarif
         if: always()
